@@ -209,6 +209,8 @@ class DeckViewModel(app: Application) : AndroidViewModel(app), DeckActions {
         RecorderService.send(ctx, if (ui.value.listening) RecorderService.ACTION_LISTEN_OFF else RecorderService.ACTION_LISTEN_ON)
     }
 
+    fun markBatteryAsked() = viewModelScope.launch { c.settings.update { it.copy(batteryAsked = true) } }
+
     /** Teclas que no hacen nada en el estado actual (rebotan sin trabarse). */
     fun isInert(key: DeckKey): Boolean = when (key) {
         DeckKey.REC -> ui.value.recording

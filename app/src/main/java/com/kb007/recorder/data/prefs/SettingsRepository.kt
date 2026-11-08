@@ -53,6 +53,7 @@ class SettingsRepository(context: Context, scope: CoroutineScope) {
         val listening = booleanPreferencesKey("listening")
         val resumeBoot = booleanPreferencesKey("resume_boot")
         val onboarding = booleanPreferencesKey("onboarding")
+        val batteryAsked = booleanPreferencesKey("battery_asked")
     }
 
     private inline fun <reified E : Enum<E>> Preferences.enum(key: Preferences.Key<String>, def: E): E =
@@ -92,6 +93,7 @@ class SettingsRepository(context: Context, scope: CoroutineScope) {
             listeningEnabled = p[K.listening] ?: d.listeningEnabled,
             resumeAfterBoot = p[K.resumeBoot] ?: d.resumeAfterBoot,
             onboardingDone = p[K.onboarding] ?: d.onboardingDone,
+            batteryAsked = p[K.batteryAsked] ?: d.batteryAsked,
         )
     }
 
@@ -133,6 +135,7 @@ class SettingsRepository(context: Context, scope: CoroutineScope) {
             p[K.listening] = s.listeningEnabled
             p[K.resumeBoot] = s.resumeAfterBoot
             p[K.onboarding] = s.onboardingDone
+            p[K.batteryAsked] = s.batteryAsked
         }
     }
 

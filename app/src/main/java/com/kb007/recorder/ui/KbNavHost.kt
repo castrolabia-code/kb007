@@ -23,7 +23,16 @@ import com.kb007.recorder.data.prefs.AudioPreset
 import com.kb007.recorder.ui.settings.SettingsActions
 import com.kb007.recorder.ui.settings.SettingsScreen
 import com.kb007.recorder.ui.settings.SettingsViewModel
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.ui.platform.LocalContext
+import com.kb007.recorder.ui.deck.DeckActions
 import com.kb007.recorder.ui.deck.DeckScreen
+import com.kb007.recorder.ui.settings.KeywordSection
+import com.kb007.recorder.ui.settings.KeywordTestDialog
+import com.kb007.recorder.ui.settings.isIgnoringBattery
+import com.kb007.recorder.ui.settings.requestIgnoreBattery
 import com.kb007.recorder.ui.library.LibraryActions
 import com.kb007.recorder.ui.library.LibraryScreen
 import com.kb007.recorder.ui.library.LibraryViewModel
@@ -50,8 +59,28 @@ fun KbNavHost(theme: KbTheme, fx: DeckFx) {
             LaunchedEffect(Unit) {
                 deckVm.messages.collect { m -> message = m; delay(2600); if (message == m) message = null }
             }
+            val ctx = LocalContext.current
+            var askBattery by remember { mutableStateOf(false) }
+            val deckActions = remember(deckVm) {
+                object : DeckActions by deckVm {
+                    override fun toggleListening() {
+                        val turningOn = !deckVm.ui.value.listening
+                        if (turningOn && !isIgnoringBattery(ctx) && !deckVm.settings.value.batteryAsked) askBattery = true
+                        deckVm.toggleListening()
+                    }
+                }
+            }
+            if (askBattery) {
+                AlertDialog(
+                    onDismissRequest = { askBattery = false; deckVm.markBatteryAsked() },
+                    title = { Text("Escuchar con la pantalla apagada") },
+                    text = { Text("Para que la palabra clave funcione durante horas con la pantalla apagada, Android tiene que dejar a KB-007 sin optimización de batería. Si no, el sistema puede cortar la escucha (sobre todo en Xiaomi, Samsung y Huawei).\n\nConsumo estimado: 3–8 % de batería por hora de escucha.") },
+                    confirmButton = { TextButton(onClick = { askBattery = false; deckVm.markBatteryAsked(); requestIgnoreBattery(ctx) }) { Text("Permitir") } },
+                    dismissButton = { TextButton(onClick = { askBattery = false; deckVm.markBatteryAsked() }) { Text("Ahora no") } },
+                )
+            }
             DeckScreen(
-                vm = deckVm, theme = theme, fx = fx, ui = ui, message = message,
+                vm = deckActions, theme = theme, fx = fx, ui = ui, message = message,
                 onOpenLibrary = { nav.navigate(Routes.LIBRARY) },
                 onOpenSettings = { nav.navigate(Routes.SETTINGS) },
             )
@@ -107,7 +136,23 @@ fun KbNavHost(theme: KbTheme, fx: DeckFx) {
                     override fun levelDb() = setVm.level.value.rmsDb
                 }
             }
-            SettingsScreen(s, caps, theme, actions, setVm.appFolderPath())
+            val vocab by setVm.vocab.collectAsStateWithLifecycle()
+            val testing by setVm.testing.collectAsStateWithLifecycle()
+            val ctx = LocalContext.current
+            var batteryExempt by remember { mutableStateOf(isIgnoringBattery(ctx)) }
+            LaunchedEffect(lifecycle) {
+                lifecycle.currentStateFlow.collect { if (it == Lifecycle.State.RESUMED) batteryExempt = isIgnoringBattery(ctx) }
+            }
+            SettingsScreen(s, caps, theme, actions, setVm.appFolderPath()) {
+                KeywordSection(s, theme, vocab, batteryExempt, update = setVm::update,
+                    onTest = setVm::startKeywordTest, onBattery = { requestIgnoreBattery(ctx) })
+            }
+            if (testing) {
+                val heard by setVm.heard.collectAsStateWithLifecycle()
+                val ready by setVm.testReady.collectAsStateWithLifecycle()
+                val err by setVm.testError.collectAsStateWithLifecycle()
+                KeywordTestDialog(s.keyword, s.keywordThreshold, ready, heard, err, onClose = setVm::stopKeywordTest)
+            }
         }
     }
 }

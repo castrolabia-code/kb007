@@ -88,8 +88,15 @@ class RecorderEngine(
     private val _events = MutableSharedFlow<EngineEvent>(extraBufferCapacity = 16)
     val events: SharedFlow<EngineEvent> = _events
 
-    /** Detector de palabra clave (se inyecta en la fase de wake word). */
+    /** Detector de palabra clave (Vosk; se inyecta desde AppContainer). */
     var keywordDetector: KeywordDetector = NoKeywordDetector
+
+    private val _keywordEvents = MutableSharedFlow<KeywordEvent>(extraBufferCapacity = 32)
+    /** Todo lo que escucha el detector (para "probar palabra clave"). */
+    val keywordEvents: SharedFlow<KeywordEvent> = _keywordEvents
+
+    /** Modo prueba: reconoce y reporta, pero no dispara grabaciones. */
+    @Volatile var keywordDryRun: Boolean = false
 
     // ---- Estado interno (solo se toca desde [control], salvo lo marcado @Volatile) ----
     private var mic: MicCapture? = null
@@ -98,6 +105,8 @@ class RecorderEngine(
     private var resampler: MonoResampler? = null
     @Volatile private var session: Session? = null
     @Volatile private var feedKeyword = false
+    /** El detector fue iniciado y no falló (aunque el modelo todavía esté cargando). */
+    private var detectorRunning = false
     private var monitorJob: Job? = null
     private var monitoring = false
     private var focusRequest: AudioFocusRequest? = null
@@ -271,26 +280,36 @@ class RecorderEngine(
         stopDetector()
         val s = settings.state.value
         val cfg = KeywordConfig(s.keyword.trim(), s.stopKeyword.trim().ifBlank { null }, s.keywordThreshold)
-        val ok = cfg.keyword.isNotEmpty() && keywordDetector.start(cfg) { ev -> scope.launch(control) { onKeyword(ev) } }
-        feedKeyword = ok
-        _state.update { it.copy(detectorReady = ok) }
-        if (!ok) emit(EngineEvent.Message("El detector de palabra clave no está disponible", isError = true))
+        val ok = cfg.keyword.isNotEmpty() && keywordDetector.start(cfg) { ev ->
+            _keywordEvents.tryEmit(ev)
+            scope.launch(control) { onKeyword(ev) }
+        }
+        detectorRunning = ok
+        feedKeyword = ok && !_state.value.inCall
+        // "Listo" recién cuando el modelo cargó (evento Ready); mientras tanto el LED ámbar parpadea.
+        _state.update { it.copy(detectorReady = false) }
+        if (!ok) emit(EngineEvent.Message(if (cfg.keyword.isEmpty()) "Configurá una palabra clave en Ajustes" else "El detector de palabra clave no está disponible", isError = true))
     }
 
     private fun stopDetector() {
         feedKeyword = false
+        detectorRunning = false
         keywordDetector.stop()
         _state.update { it.copy(detectorReady = false) }
     }
 
     private suspend fun onKeyword(ev: KeywordEvent) {
         when (ev) {
-            is KeywordEvent.Triggered -> if (session == null && _state.value.listening && !_state.value.inCall) {
+            is KeywordEvent.Ready -> _state.update { it.copy(detectorReady = true) }
+            is KeywordEvent.Triggered -> if (!keywordDryRun && session == null && _state.value.listening && !_state.value.inCall) {
                 emit(EngineEvent.KeywordTriggered(ev.text))
                 doStartRecording(TriggerType.KEYWORD, ev.text)
             }
-            is KeywordEvent.StopWord -> if (session != null) doStopRecording()
-            is KeywordEvent.Error -> emit(EngineEvent.Message(ev.message, isError = true))
+            is KeywordEvent.StopWord -> if (!keywordDryRun && session != null) doStopRecording()
+            is KeywordEvent.Error -> {
+                emit(EngineEvent.Message(ev.message, isError = true))
+                if (ev.fatal) { feedKeyword = false; detectorRunning = false; _state.update { it.copy(detectorReady = false) } }
+            }
             is KeywordEvent.Heard -> Unit
         }
     }
@@ -454,7 +473,7 @@ class RecorderEngine(
         val was = _state.value.inCall
         if (inCall == was) return
         _state.update { it.copy(inCall = inCall) }
-        feedKeyword = !inCall && _state.value.detectorReady
+        feedKeyword = !inCall && detectorRunning
         if (inCall) {
             if (session != null) {
                 when (settings.state.value.callPolicy) {

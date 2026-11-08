@@ -8,7 +8,10 @@ sealed interface KeywordEvent {
     data class StopWord(val text: String, val confidence: Float) : KeywordEvent
     /** Texto parcial/final escuchado (para el modo "probar palabra clave"). */
     data class Heard(val text: String, val confidence: Float, val accepted: Boolean) : KeywordEvent
-    data class Error(val message: String) : KeywordEvent
+    /** [fatal] = el detector se detuvo y no va a reconocer nada. */
+    data class Error(val message: String, val fatal: Boolean = true) : KeywordEvent
+    /** Modelo cargado y escuchando. */
+    data object Ready : KeywordEvent
 }
 
 data class KeywordConfig(

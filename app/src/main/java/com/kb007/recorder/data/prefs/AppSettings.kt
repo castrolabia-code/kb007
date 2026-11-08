@@ -99,4 +99,6 @@ data class AppSettings(
     val listeningEnabled: Boolean = false,
     val resumeAfterBoot: Boolean = true,
     val onboardingDone: Boolean = false,
+    /** Ya se explicó/pidió la exclusión de optimización de batería. */
+    val batteryAsked: Boolean = false,
 )

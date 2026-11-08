@@ -35,8 +35,6 @@ android {
     }
     kotlinOptions { jvmTarget = "17" }
     buildFeatures { compose = true; buildConfig = true }
-    // El modelo de Vosk ya viene comprimido internamente; evitamos que aapt lo recomprima.
-    androidResources { noCompress += listOf("fst", "mdl", "ie", "dubm", "mat") }
     testOptions {
         unitTests {
             isIncludeAndroidResources = true
@@ -51,6 +49,14 @@ android {
 }
 
 ksp { arg("room.schemaLocation", "$projectDir/schemas") }
+
+// Aviso si falta el modelo de voz (la app compila igual, pero sin palabra clave).
+val modelDir = file("src/main/assets/model-es/am")
+tasks.named("preBuild") {
+    doFirst {
+        if (!modelDir.exists()) logger.warn("⚠ KB-007: falta el modelo Vosk. Ejecutá tools/fetch_model.sh antes de compilar.")
+    }
+}
 
 dependencies {
     implementation(libs.androidx.core.ktx)
@@ -79,6 +85,7 @@ dependencies {
 
     testImplementation(libs.junit)
     testImplementation(libs.coroutines.test)
+    testImplementation("org.json:json:20240303") // org.json real para tests JVM
     testImplementation(libs.robolectric)
     testImplementation(libs.roborazzi)
     testImplementation(libs.roborazzi.compose)

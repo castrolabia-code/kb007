@@ -27,8 +27,12 @@ class AppContainer(private val context: Context) {
     fun capabilities(): DeviceCapabilities = caps ?: DeviceCapabilities.probe(context).also { caps = it }
     fun refreshCapabilities() { caps = DeviceCapabilities.probe(context) }
 
+    val voskModels by lazy { com.kb007.recorder.wakeword.VoskModelManager(context) }
+
     val engine by lazy {
-        RecorderEngine(context, settings, db.recordings(), storage, appScope, ::capabilities)
+        RecorderEngine(context, settings, db.recordings(), storage, appScope, ::capabilities).also {
+            it.keywordDetector = com.kb007.recorder.wakeword.VoskKeywordDetector(voskModels)
+        }
     }
 
     val share by lazy { com.kb007.recorder.share.ShareHelper(context, storage) }
