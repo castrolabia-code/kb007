@@ -99,6 +99,7 @@ class RecorderEngine(
     @Volatile private var session: Session? = null
     @Volatile private var feedKeyword = false
     private var monitorJob: Job? = null
+    private var monitoring = false
     private var focusRequest: AudioFocusRequest? = null
     private var recordingCallback: AudioManager.AudioRecordingCallback? = null
 
@@ -149,6 +150,12 @@ class RecorderEngine(
     fun stopRecording() = scope.launch(control) { doStopRecording() }
     fun pause() = scope.launch(control) { doPause(PauseReason.USER) }
     fun resume() = scope.launch(control) { doResume(PauseReason.USER) }
+    /** Abre el micrófono solo para medir nivel (pantalla de ajustes). No graba nada. */
+    fun setMonitoring(on: Boolean) = scope.launch(control) {
+        monitoring = on
+        if (on) openMic()
+        else if (session == null && !_state.value.listening) closeMic()
+    }
     fun togglePause() = scope.launch(control) {
         if (_state.value.mode == RecMode.PAUSED) doResume(PauseReason.USER) else doPause(PauseReason.USER)
     }
@@ -257,7 +264,7 @@ class RecorderEngine(
         stopDetector()
         _state.update { it.copy(listening = false) }
         settings.update { it.copy(listeningEnabled = false) }
-        if (session == null) closeMic()
+        if (session == null && !monitoring) closeMic()
     }
 
     private fun restartDetector() {
@@ -367,7 +374,7 @@ class RecorderEngine(
         session = null
         abandonFocus()
         _state.update { it.copy(mode = RecMode.IDLE, pauseReason = null, finalizing = true, recordingId = null) }
-        if (!_state.value.listening) closeMic()
+        if (!_state.value.listening && !monitoring) closeMic()
 
         withContext(Dispatchers.IO) {
             s.queue.put(POISON)

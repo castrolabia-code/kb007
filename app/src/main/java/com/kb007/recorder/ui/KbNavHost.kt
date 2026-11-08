@@ -1,24 +1,28 @@
 package com.kb007.recorder.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.DisposableEffect
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.kb007.recorder.data.db.Recording
+import com.kb007.recorder.data.prefs.AppSettings
+import com.kb007.recorder.data.prefs.AudioPreset
+import com.kb007.recorder.ui.settings.SettingsActions
+import com.kb007.recorder.ui.settings.SettingsScreen
+import com.kb007.recorder.ui.settings.SettingsViewModel
 import com.kb007.recorder.ui.deck.DeckScreen
 import com.kb007.recorder.ui.library.LibraryActions
 import com.kb007.recorder.ui.library.LibraryScreen
@@ -77,13 +81,33 @@ fun KbNavHost(theme: KbTheme, fx: DeckFx) {
             }
             LibraryScreen(ui, theme, actions, message)
         }
-        composable(Routes.SETTINGS) { Placeholder("Ajustes (fase 4)") }
-    }
-}
-
-@Composable
-private fun Placeholder(text: String) {
-    Box(Modifier.fillMaxSize().background(Color(0xFF1B1A18)), contentAlignment = Alignment.Center) {
-        Text(text, color = Color(0xFFF3E9D2))
+        composable(Routes.SETTINGS) {
+            val setVm: SettingsViewModel = viewModel()
+            val s by setVm.settings.collectAsStateWithLifecycle()
+            val caps by setVm.caps.collectAsStateWithLifecycle()
+            val folderPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+                if (uri != null) setVm.setCustomFolder(uri)
+            }
+            // Micrófono abierto solo para el medidor mientras la pantalla está visible.
+            val lifecycle = LocalLifecycleOwner.current.lifecycle
+            DisposableEffect(lifecycle) {
+                val obs = LifecycleEventObserver { _, e ->
+                    if (e == Lifecycle.Event.ON_RESUME) setVm.setMonitoring(true)
+                    if (e == Lifecycle.Event.ON_PAUSE) setVm.setMonitoring(false)
+                }
+                lifecycle.addObserver(obs)
+                onDispose { lifecycle.removeObserver(obs); setVm.setMonitoring(false) }
+            }
+            val actions = remember(setVm) {
+                object : SettingsActions {
+                    override fun back() { nav.popBackStack() }
+                    override fun update(f: (AppSettings) -> AppSettings) = setVm.update(f)
+                    override fun preset(p: AudioPreset) = setVm.applyPreset(p)
+                    override fun pickFolder() = folderPicker.launch(null)
+                    override fun levelDb() = setVm.level.value.rmsDb
+                }
+            }
+            SettingsScreen(s, caps, theme, actions, setVm.appFolderPath())
+        }
     }
 }

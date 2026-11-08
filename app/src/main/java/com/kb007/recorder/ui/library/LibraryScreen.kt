@@ -137,9 +137,9 @@ fun LibraryScreen(ui: LibraryUi, theme: KbTheme, actions: LibraryActions, messag
                             .clickable { actions.setSort(s) }.padding(horizontal = 12.dp, vertical = 6.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text(s.label, color = if (sel) Color.White else theme.label, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                        Text(s.label, color = if (sel) com.kb007.recorder.ui.settings.onAccent(theme) else theme.label, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                         if (sel) Icon(if (ui.descending) Icons.Filled.ArrowDownward else Icons.Filled.ArrowUpward,
-                            if (ui.descending) "descendente" else "ascendente", Modifier.size(14.dp), tint = Color.White)
+                            if (ui.descending) "descendente" else "ascendente", Modifier.size(14.dp), tint = com.kb007.recorder.ui.settings.onAccent(theme))
                     }
                 }
             }
