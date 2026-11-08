@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.roborazzi)
 }
 
 android {
@@ -36,7 +37,16 @@ android {
     buildFeatures { compose = true; buildConfig = true }
     // El modelo de Vosk ya viene comprimido internamente; evitamos que aapt lo recomprima.
     androidResources { noCompress += listOf("fst", "mdl", "ie", "dubm", "mat") }
-    testOptions { unitTests { isIncludeAndroidResources = true } }
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+            all {
+                // Robolectric descarga android-all desde Maven Central; usamos el mismo espejo.
+                it.systemProperty("robolectric.defaultRepositoryUrl", "https://maven-central.storage-download.googleapis.com/maven2")
+                it.maxHeapSize = "3g"
+            }
+        }
+    }
     packaging { resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" } }
 }
 
@@ -69,4 +79,10 @@ dependencies {
 
     testImplementation(libs.junit)
     testImplementation(libs.coroutines.test)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.roborazzi)
+    testImplementation(libs.roborazzi.compose)
+    testImplementation(libs.androidx.test.core)
+    testImplementation(platform(libs.compose.bom))
+    testImplementation(libs.compose.ui.test.junit4)
 }

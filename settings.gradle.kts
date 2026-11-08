@@ -1,7 +1,9 @@
 pluginManagement {
     repositories {
         google()
-        maven("https://repo1.maven.org/maven2/") // Maven Central (espejo principal)
+        // Maven Central vía el espejo de Google (más estable desde redes con límite de tasa)
+        maven("https://maven-central.storage-download.googleapis.com/maven2/")
+        maven("https://repo1.maven.org/maven2/")
         gradlePluginPortal()
     }
 }
@@ -9,7 +11,9 @@ dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
-        maven("https://repo1.maven.org/maven2/") // Maven Central (espejo principal)
+        // Maven Central vía el espejo de Google (más estable desde redes con límite de tasa)
+        maven("https://maven-central.storage-download.googleapis.com/maven2/")
+        maven("https://repo1.maven.org/maven2/")
     }
 }
 rootProject.name = "KB-007"

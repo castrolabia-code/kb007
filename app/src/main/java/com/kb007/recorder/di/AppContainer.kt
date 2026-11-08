@@ -31,6 +31,11 @@ class AppContainer(private val context: Context) {
         RecorderEngine(context, settings, db.recordings(), storage, appScope, ::capabilities)
     }
 
+    /** Reproductor (vive en el hilo principal). */
+    val player by lazy {
+        com.kb007.recorder.audio.playback.PlayerController(context, CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate))
+    }
+
     /** true mientras alguna Activity está visible (para decidir si avisar por notificación). */
     @Volatile var appVisible: Boolean = false
 }
