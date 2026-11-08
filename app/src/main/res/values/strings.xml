@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">KB-007</string>
+    <string name="channel_service">Grabadora KB-007</string>
+    <string name="channel_service_desc">Estado de escucha y grabación en segundo plano</string>
+    <string name="channel_alerts">Avisos KB-007</string>
+    <string name="channel_alerts_desc">Avisos (reanudar escucha tras reinicio, errores)</string>
+</resources>

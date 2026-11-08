@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/notif_bg"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:padding="10dp">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical">
+        <ImageView android:id="@+id/led_rec" android:layout_width="12dp" android:layout_height="12dp"
+            android:src="@drawable/led_off" android:contentDescription="REC" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="REC" android:textColor="#FFB8B0A6" android:textSize="8sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:gravity="center"
+        android:orientation="vertical">
+        <ImageView android:id="@+id/led_kw" android:layout_width="12dp" android:layout_height="12dp"
+            android:src="@drawable/led_off" android:contentDescription="Escucha" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="KEY" android:textColor="#FFB8B0A6" android:textSize="8sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:fontFamily="monospace" android:letterSpacing="0.15" android:text="KB-007"
+            android:textColor="#FFF3E9D2" android:textSize="14sp" android:textStyle="bold" />
+        <TextView android:id="@+id/status" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:ellipsize="end" android:maxLines="1" android:textColor="#FFD9CFC0" android:textSize="12sp" />
+    </LinearLayout>
+
+    <Chronometer
+        android:id="@+id/chrono"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#FF0E0D0C"
+        android:fontFamily="monospace"
+        android:paddingStart="6dp"
+        android:paddingEnd="6dp"
+        android:textColor="#FFFF8A65"
+        android:textSize="16sp" />
+</LinearLayout>

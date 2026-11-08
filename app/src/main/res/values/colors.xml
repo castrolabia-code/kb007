@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="kb_bg">#FF1B1A18</color>
+    <color name="kb_red">#FFD32F2F</color>
+    <color name="kb_amber">#FFFFB300</color>
+    <color name="kb_dark">#FF222222</color>
+    <color name="kb_cream">#FFF3E9D2</color>
+</resources>
