@@ -142,6 +142,15 @@ class RecorderEngine(
                 }
             }
         }
+        // Cambio de pre-grabación con el micrófono abierto: redimensionamos el buffer.
+        scope.launch {
+            settings.state.map { it.preRollSec }.distinctUntilChanged().drop(1).collect { sec ->
+                withContext(control) {
+                    val m = mic ?: return@withContext
+                    preRoll.resize(m.config.sampleRate * m.actualChannels * sec.coerceIn(1, 10))
+                }
+            }
+        }
         scope.launch {
             settings.state.map { KeywordConfig(it.keyword, it.stopKeyword.ifBlank { null }, it.keywordThreshold) }
                 .distinctUntilChanged().drop(1).collect {

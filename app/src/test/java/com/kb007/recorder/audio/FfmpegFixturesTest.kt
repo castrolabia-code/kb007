@@ -35,3 +35,15 @@ class FfmpegFixturesTest {
         w.finish()
     }
 }
+
+class SynthFixturesTest {
+    @Test fun writeMechanicalSounds() {
+        val dir = File("build/kbcheck").apply { mkdirs() }
+        fun save(name: String, pcm: ShortArray) { val w = WavWriter(File(dir, name), com.kb007.recorder.ui.fx.Synth.RATE, 1); w.write(pcm, 0, pcm.size); w.finish() }
+        save("fx_tecla.wav", com.kb007.recorder.ui.fx.Synth.keyClick())
+        save("fx_eject.wav", com.kb007.recorder.ui.fx.Synth.ejectClack())
+        save("fx_perilla.wav", com.kb007.recorder.ui.fx.Synth.knobTick())
+        save("fx_motor.wav", com.kb007.recorder.ui.fx.Synth.motorLoop(false))
+        save("fx_motor_rapido.wav", com.kb007.recorder.ui.fx.Synth.motorLoop(true))
+    }
+}

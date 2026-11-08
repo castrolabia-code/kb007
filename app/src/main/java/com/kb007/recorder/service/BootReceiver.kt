@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
  */
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
+        if (intent.action != Intent.ACTION_BOOT_COMPLETED && intent.action != Intent.ACTION_MY_PACKAGE_REPLACED) return
         val pending = goAsync()
         val app = context.applicationContext as KbApp
         CoroutineScope(Dispatchers.IO).launch {

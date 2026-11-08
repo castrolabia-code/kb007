@@ -43,6 +43,7 @@ data class PlayerState(
  * Reproducción de grabaciones con ExoPlayer. Debe usarse desde el hilo principal.
  * REW/FF mueven la posición a ~20x sin audio, como el bobinado de un cassette.
  */
+@androidx.annotation.OptIn(markerClass = [androidx.media3.common.util.UnstableApi::class])
 class PlayerController(private val context: Context, private val scope: CoroutineScope) {
     private var player: ExoPlayer? = null
     private val _state = MutableStateFlow(PlayerState())

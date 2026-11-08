@@ -8,3 +8,4 @@ captures/
 .kotlin/
 # El modelo Vosk se descarga con tools/fetch_model.sh (ver README)
 app/src/main/assets/model-es/
+*.apk

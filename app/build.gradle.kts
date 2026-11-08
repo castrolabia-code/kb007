@@ -20,9 +20,20 @@ android {
         ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a") }
     }
 
+    signingConfigs {
+        // Clave debug fija del proyecto (uso personal): permite instalar APKs nuevos encima
+        // de los viejos aunque se compilen en otra máquina, sin perder las grabaciones.
+        getByName("debug") {
+            storeFile = rootProject.file("keystore/debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
         debug {
-            applicationIdSuffix = ""
+            signingConfig = signingConfigs.getByName("debug")
         }
         release {
             isMinifyEnabled = false
