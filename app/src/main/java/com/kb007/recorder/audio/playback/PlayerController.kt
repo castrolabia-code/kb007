@@ -90,6 +90,19 @@ class PlayerController(private val context: Context, private val scope: Coroutin
         _state.value = PlayerState(loaded = rec, positionMs = pos, durationMs = rec.durationMs)
     }
 
+    /** Actualiza los metadatos del cassette cargado (p. ej. tras renombrar) sin recargar el audio. */
+    fun updateLoaded(rec: Recording) {
+        val cur = _state.value.loaded ?: return
+        if (cur.id != rec.id) return
+        if (cur.uri != rec.uri) {
+            // El archivo cambió de nombre: recargamos manteniendo la posición.
+            val pos = player?.currentPosition ?: 0
+            player?.setMediaItem(MediaItem.fromUri(Uri.parse(rec.uri)), pos)
+            player?.prepare()
+        }
+        _state.update { it.copy(loaded = rec) }
+    }
+
     fun eject() {
         stopWind()
         player?.stop()

@@ -31,6 +31,8 @@ class AppContainer(private val context: Context) {
         RecorderEngine(context, settings, db.recordings(), storage, appScope, ::capabilities)
     }
 
+    val share by lazy { com.kb007.recorder.share.ShareHelper(context, storage) }
+
     /** Reproductor (vive en el hilo principal). */
     val player by lazy {
         com.kb007.recorder.audio.playback.PlayerController(context, CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate))
