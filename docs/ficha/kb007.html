@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>KB-007 Spy Recorder — Ficha de la app</title>
+<style>
+  @page { size: A4; margin: 0; }
+  :root {
+    --bg: #070707; --panel: #121212; --panel2: #1a1a1a; --line: #2a2a2a;
+    --text: #f1ece3; --muted: #a39d93; --dim: #6e6961;
+    --red: #e53935; --red2: #ff5a4e; --amber: #ffb300; --cream: #f3e9d2; --green: #66bb6a; --cyan: #29b6f6;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); }
+  body { font-family: "Inter", "DejaVu Sans", sans-serif; color: var(--text); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .page { width: 210mm; height: 297mm; position: relative; overflow: hidden; page-break-after: always; background: var(--bg); padding: 16mm 15mm 14mm; }
+  .page:last-child { page-break-after: auto; }
+  .mono { font-family: "JetBrains Mono", monospace; }
+
+  /* Fondo con textura sutil */
+  .page::before { content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(1200px 500px at 85% -10%, rgba(229,57,53,.16), transparent 60%),
+                radial-gradient(900px 500px at -10% 110%, rgba(255,179,0,.08), transparent 60%); }
+  .page > * { position: relative; }
+
+  /* Pie de página */
+  .foot { position: absolute; left: 15mm; right: 15mm; bottom: 8mm; display: flex; justify-content: space-between;
+    font-size: 7.5pt; color: var(--dim); letter-spacing: .08em; text-transform: uppercase; }
+  .foot b { color: var(--muted); font-weight: 700; }
+
+  /* Títulos de sección */
+  .eyebrow { font-size: 8pt; letter-spacing: .32em; text-transform: uppercase; color: var(--red2); font-weight: 700; }
+  h2 { font-family: "Inter Display", "Inter", sans-serif; font-size: 27pt; line-height: 1.05; font-weight: 800; letter-spacing: -.02em; margin: 3mm 0 3mm; }
+  h2 em { font-style: normal; color: var(--red2); }
+  .lead { font-size: 11pt; line-height: 1.55; color: #d6d0c6; max-width: 165mm; }
+  h3 { font-size: 11.5pt; font-weight: 700; margin-bottom: 1.5mm; }
+  p { font-size: 9.2pt; line-height: 1.55; color: var(--muted); }
+
+  /* ======================= PORTADA ======================= */
+  .store-bar { display: flex; justify-content: space-between; align-items: center; font-size: 8pt; color: var(--muted);
+    letter-spacing: .14em; text-transform: uppercase; border-bottom: 1px solid var(--line); padding-bottom: 4mm; }
+  .store-bar .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--red); margin-right: 6px; box-shadow: 0 0 8px var(--red); }
+  .hero { display: flex; gap: 8mm; margin-top: 9mm; align-items: center; }
+  .icon { width: 34mm; height: 34mm; border-radius: 8mm; background: linear-gradient(160deg, #2c2c2c, #0d0d0d); border: 1px solid #333;
+    box-shadow: 0 10px 30px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.08); display: grid; place-items: center; flex: none; }
+  .brand { font-family: "Inter Display", "Inter", sans-serif; font-weight: 900; font-size: 62pt; line-height: .9; letter-spacing: -.035em; }
+  .brand .dash { color: var(--red); }
+  .spy { margin-top: 2.5mm; display: inline-flex; align-items: center; gap: 3mm; font-weight: 800; font-size: 15pt; letter-spacing: .55em;
+    color: #fff; padding: 2mm 3mm 2mm 4mm; background: var(--red); border-radius: 1.5mm; box-shadow: 0 0 24px rgba(229,57,53,.45); }
+  .tagline { margin-top: 4mm; font-size: 13pt; color: #e7e1d7; font-weight: 500; }
+  .tagline b { color: var(--amber); font-weight: 700; }
+  .meta { display: grid; grid-template-columns: repeat(5, 1fr); margin-top: 8mm; border: 1px solid var(--line); border-radius: 3mm; overflow: hidden; }
+  .meta div { padding: 3mm 3mm; text-align: center; border-right: 1px solid var(--line); background: rgba(255,255,255,.02); }
+  .meta div:last-child { border-right: 0; }
+  .meta b { display: block; font-size: 12pt; color: var(--text); }
+  .meta span { font-size: 7pt; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); }
+  .cta { display: flex; gap: 4mm; margin-top: 6mm; align-items: center; }
+  .btn { background: var(--red); color: #fff; font-weight: 800; font-size: 11pt; padding: 3.2mm 9mm; border-radius: 10mm; letter-spacing: .02em;
+    box-shadow: 0 6px 18px rgba(229,57,53,.4); }
+  .chip { border: 1px solid #3a3a3a; color: #d8d2c8; font-size: 8.5pt; padding: 2mm 3.5mm; border-radius: 10mm; }
+  .phones { display: flex; justify-content: center; align-items: flex-end; gap: 6mm; margin-top: 9mm; height: 106mm; }
+  .highlights { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; margin-top: 7mm; }
+  .highlights div { border-top: 2px solid var(--red); padding-top: 2.5mm; font-size: 8.6pt; color: var(--muted); line-height: 1.45; }
+  .highlights b { display: block; color: var(--text); font-size: 10pt; margin-bottom: .8mm; }
+  .phone { background: #050505; border: 2.2mm solid #1d1d1d; border-radius: 7mm; padding: 2mm; box-shadow: 0 20px 40px rgba(0,0,0,.7), 0 0 0 .3mm #3a3a3a;
+    display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .phone img { width: 100%; display: block; border-radius: 3mm; }
+  .phone.big { width: 68mm; height: 104mm; }
+  .phone.small { width: 54mm; height: 84mm; opacity: .95; }
+  .phone .screen { width: 100%; height: 100%; border-radius: 4.5mm; background: linear-gradient(#2b2e33, #111215); display: flex; align-items: center; justify-content: center; padding: 1.5mm; }
+
+  /* ======================= SPY ======================= */
+  .spy-hero { display: grid; grid-template-columns: 1fr 58mm; gap: 7mm; margin-top: 2mm; align-items: start; }
+  .steps { margin-top: 4mm; display: grid; gap: 2.6mm; align-content: start; }
+  .step { display: grid; grid-template-columns: 11mm 1fr; gap: 3mm; align-items: start; background: var(--panel); border: 1px solid var(--line);
+    border-radius: 3mm; padding: 2.8mm 3.5mm; }
+  .step .n { width: 9mm; height: 9mm; border-radius: 50%; background: rgba(229,57,53,.15); border: 1px solid var(--red); color: var(--red2);
+    display: grid; place-items: center; font-weight: 800; font-size: 11pt; }
+  .step h3 { font-size: 10.5pt; }
+  .step p { font-size: 8.6pt; }
+  .shot { border-radius: 4mm; overflow: hidden; border: 1px solid #2c2c2c; box-shadow: 0 14px 30px rgba(0,0,0,.6); }
+  .shot img { width: 100%; display: block; }
+  .virtues { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3mm; margin-top: 4.5mm; }
+  .virtue { background: linear-gradient(180deg, #171717, #101010); border: 1px solid var(--line); border-radius: 3mm; padding: 3.5mm; }
+  .virtue .big { font-size: 17pt; font-weight: 900; color: var(--amber); letter-spacing: -.02em; }
+  .virtue p { font-size: 8pt; margin-top: 1mm; }
+  .note { margin-top: 3.5mm; font-size: 7.6pt; line-height: 1.5; color: var(--dim); border-left: 2px solid #444; padding: 1.5mm 0 1.5mm 3mm; }
+  .note b { color: var(--muted); }
+
+  /* ======================= FEATURES ======================= */
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3.5mm; margin-top: 6mm; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 3.5mm; padding: 4.2mm 4.5mm; display: grid; grid-template-columns: 11mm 1fr; gap: 3.5mm; }
+  .card .ico { width: 11mm; height: 11mm; border-radius: 3mm; display: grid; place-items: center; }
+  .card h3 { font-size: 10.6pt; }
+  .card p { font-size: 8.4pt; }
+  .card ul { list-style: none; margin-top: 1.4mm; }
+  .card li { font-size: 8.2pt; color: var(--muted); line-height: 1.5; padding-left: 3.5mm; position: relative; }
+  .card li::before { content: ""; position: absolute; left: 0; top: 1.9mm; width: 1.4mm; height: 1.4mm; border-radius: 50%; background: var(--red); }
+
+  /* ======================= GALERÍA ======================= */
+  .gallery { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4mm; margin-top: 6mm; }
+  .gallery figure { text-align: center; }
+  .gallery figcaption { font-size: 8pt; color: var(--muted); margin-top: 2mm; }
+  .gallery figcaption b { display: block; color: var(--text); font-size: 9pt; }
+  .gal-img { border-radius: 3mm; overflow: hidden; border: 1px solid #2a2a2a; background: linear-gradient(#2b2e33, #111215); padding: 1.5mm; }
+  .gal-img img { width: 100%; display: block; border-radius: 2mm; }
+  .wide { display: grid; grid-template-columns: 1.15fr 1fr; gap: 6mm; margin-top: 7mm; align-items: start; }
+
+  /* ======================= TABLAS ======================= */
+  table { width: 100%; border-collapse: collapse; font-size: 8.6pt; }
+  th, td { text-align: left; padding: 1.8mm 2.6mm; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 7.4pt; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); font-weight: 700; }
+  td { color: #d6d0c6; }
+  td:first-child { color: var(--muted); width: 38%; }
+  .yes { color: var(--green); font-weight: 800; }
+  .no { color: #6e6961; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 7mm; margin-top: 6mm; }
+  .box { background: var(--panel); border: 1px solid var(--line); border-radius: 3.5mm; padding: 4mm; }
+  .box h3 { margin-bottom: 2.5mm; }
+  .uses { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; margin-top: 6mm; }
+  .use { background: var(--panel); border: 1px solid var(--line); border-radius: 3mm; padding: 3.5mm; }
+  .use .t { font-size: 10pt; font-weight: 700; margin-bottom: 1mm; }
+  .use p { font-size: 8.2pt; }
+  .end { margin-top: 5mm; display: flex; align-items: center; justify-content: space-between; background: linear-gradient(90deg, rgba(229,57,53,.18), rgba(229,57,53,.02));
+    border: 1px solid rgba(229,57,53,.35); border-radius: 4mm; padding: 6mm 7mm; }
+  .end .brand { font-size: 30pt; }
+  .end .spy { font-size: 9.5pt; padding: 1.4mm 2.2mm 1.4mm 3mm; margin-top: 1.5mm; }
+</style>
+</head>
+<body>
+
+<!-- Ícono reutilizable -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <symbol id="cassette" viewBox="0 0 108 72">
+      <rect x="2" y="2" width="104" height="68" rx="6" fill="#f3e9d2"/>
+      <rect x="2" y="10" width="104" height="9" fill="#e53935"/>
+      <rect x="22" y="26" width="64" height="20" rx="6" fill="#2b2420"/>
+      <circle cx="34" cy="36" r="6.5" fill="#f3e9d2"/><circle cx="74" cy="36" r="6.5" fill="#f3e9d2"/>
+      <circle cx="34" cy="36" r="2.4" fill="#2b2420"/><circle cx="74" cy="36" r="2.4" fill="#2b2420"/>
+      <path d="M24 70 L30 58 H78 L84 70 Z" fill="#8a7f70"/>
+      <circle cx="54" cy="64" r="2" fill="#2b2420"/>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- ========================= PÁGINA 1: PORTADA ========================= -->
+<section class="page">
+  <div class="store-bar">
+    <div><span class="dot"></span>APK · Audio y grabación</div>
+    <div class="mono">v1.1.0 · Android 8.0 o superior</div>
+  </div>
+
+  <div class="hero">
+    <div class="icon"><svg width="26mm" height="18mm"><use href="#cassette"/></svg></div>
+    <div>
+      <div class="brand">KB<span class="dash">-</span>007</div>
+      <div class="spy">SPY RECORDER</div>
+      <div class="tagline">La grabadora de cassette que <b>escucha por vos</b>: decí tu palabra secreta y empieza a grabar, aunque la pantalla esté apagada.</div>
+    </div>
+  </div>
+
+  <div class="meta">
+    <div><b>Android 8+</b><span>Compatible</span></div>
+    <div><b>100 %</b><span>Offline</span></div>
+    <div><b>0</b><span>Anuncios</span></div>
+    <div><b>79 MB</b><span>Tamaño</span></div>
+    <div><b>Español</b><span>Idioma</span></div>
+  </div>
+
+  <div class="cta">
+    <div class="btn">Descargar APK</div>
+    <div class="chip">Sin cuentas</div>
+    <div class="chip">Sin nube</div>
+    <div class="chip">Funciona con la pantalla apagada</div>
+  </div>
+
+  <div class="phones">
+    <div class="phone small"><div class="screen"><img src="img/sport.png"></div></div>
+    <div class="phone big"><div class="screen"><img src="img/metal.png"></div></div>
+    <div class="phone small"><div class="screen" style="background:linear-gradient(#3e2a1e,#1a110c)"><img src="img/wood.png"></div></div>
+  </div>
+
+  <div class="highlights">
+    <div><b>Modo Spy por voz</b>Decí tu palabra secreta y graba sola, con la pantalla apagada.</div>
+    <div><b>Nunca pierde un audio</b>Recupera la grabación aunque se corte la batería o la app.</div>
+    <div><b>Un cassette por grabación</b>12 estilos únicos para encontrar cada audio al instante.</div>
+  </div>
+
+  <div class="foot"><span><b>KB-007 Spy Recorder</b> · Grabadora de voz para Android</span><span>01</span></div>
+</section>
+
+<!-- ========================= PÁGINA 2: MODO SPY ========================= -->
+<section class="page">
+  <div class="eyebrow">La virtud estrella · Modo Spy</div>
+  <h2>Graba con solo <em>decir una palabra</em>.<br>Sin tocar el teléfono.</h2>
+  <p class="lead">Con la pantalla apagada y el teléfono en el bolsillo, KB-007 queda escuchando. Cuando oye <b style="color:var(--amber)">tu palabra secreta</b>, graba al instante, con los segundos anteriores incluidos. El reconocimiento de voz ocurre dentro del teléfono: nada sale a internet.</p>
+
+  <div class="spy-hero">
+    <div class="steps">
+      <div class="step"><div class="n">1</div><div><h3>Elegí tu palabra secreta</h3><p>Una o varias palabras («atención grabadora», «grabadora empezá»). La app verifica al instante que el reconocedor la conozca y te deja probarla en vivo antes de usarla.</p></div></div>
+      <div class="step"><div class="n">2</div><div><h3>Activá el modo escucha y guardá el teléfono</h3><p>Un switch en el aparato. Después podés apagar la pantalla o salir de la app: KB-007 sigue escuchando en segundo plano con un consumo bajo de batería.</p></div></div>
+      <div class="step"><div class="n">3</div><div><h3>Decí la palabra: graba sola</h3><p>Una vibración breve (opcional y silenciosa) confirma que arrancó. La grabación incluye de 2 a 5 segundos <b>previos</b> a la palabra, para no perder el comienzo.</p></div></div>
+      <div class="step"><div class="n">4</div><div><h3>Cortá como quieras</h3><p>Con una palabra de detención («basta»), tras unos segundos de silencio, por duración máxima o con un toque en la notificación. Cada grabación queda marcada como <b>«por palabra clave»</b>.</p></div></div>
+    </div>
+    <div>
+      <div class="shot"><img src="img/keyword.png"></div>
+      <div class="shot" style="margin-top:3mm"><img src="img/kwtest.png"></div>
+    </div>
+  </div>
+
+  <div class="virtues">
+    <div class="virtue"><div class="big">0 toques</div><p>Manos libres: grabás aunque tengas las manos ocupadas o el teléfono lejos.</p></div>
+    <div class="virtue"><div class="big">Pantalla off</div><p>Escucha y graba con el equipo bloqueado, como un grabador de bolsillo.</p></div>
+    <div class="virtue"><div class="big">2–5 s</div><p>De pre-grabación: el archivo empieza antes de que digas la palabra.</p></div>
+    <div class="virtue"><div class="big">Offline</div><p>Reconocimiento de voz local. Sin servidores, sin cuentas, sin rastros en la nube.</p></div>
+  </div>
+
+  <div class="note"><b>Uso responsable.</b> El modo Spy está pensado para registrar tus propias notas, clases, reuniones y ensayos sin tocar el teléfono. Grabar a otras personas sin su consentimiento puede estar prohibido según la ley de tu país. Android muestra su indicador de micrófono y KB-007 mantiene una notificación mientras escucha.</div>
+
+  <div class="foot"><span><b>KB-007 Spy Recorder</b> · Modo Spy</span><span>02</span></div>
+</section>
+
+<!-- ========================= PÁGINA 3: CARACTERÍSTICAS ========================= -->
+<section class="page">
+  <div class="eyebrow">Características</div>
+  <h2>Un walkman de los 80<br>con <em>tecnología de hoy</em>.</h2>
+  <p class="lead">Cada detalle del aparato está dibujado y animado a 60 cuadros por segundo. Por dentro tiene un motor de grabación profesional diseñado para no perder nunca un audio.</p>
+
+  <div class="grid">
+    <div class="card"><div class="ico" style="background:rgba(229,57,53,.15)"><svg width="7mm" height="5mm"><use href="#cassette"/></svg></div>
+      <div><h3>Cassette que cobra vida</h3><p>Los carretes giran mientras grabás o escuchás y la cinta pasa de un lado al otro según el avance.</p>
+      <ul><li>Teclas mecánicas que se hunden y se traban (REC + PLAY juntas)</li><li>VU de aguja real, contador que rueda y LEDs</li></ul></div></div>
+
+    <div class="card"><div class="ico" style="background:rgba(255,179,0,.14)"><svg width="6mm" height="6mm" viewBox="0 0 24 24"><path fill="#ffb300" d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1A7 7 0 0 0 19 11h-2z"/></svg></div>
+      <div><h3>Calidad de estudio, a tu medida</h3><p>Desde notas de voz livianas hasta audio sin compresión.</p>
+      <ul><li>M4A/AAC, OGG/Opus y WAV · 16 a 48 kHz · 64 a 256 kbps</li><li>Mono o estéreo · 4 presets en un toque</li></ul></div></div>
+
+    <div class="card"><div class="ico" style="background:rgba(41,182,246,.13)"><svg width="6mm" height="6mm" viewBox="0 0 24 24"><path fill="#29b6f6" d="M3 10h2v4H3zm4-3h2v10H7zm4-4h2v18h-2zm4 5h2v8h-2zm4 2h2v4h-2z"/></svg></div>
+      <div><h3>Sonido limpio</h3><p>Usa el procesamiento del propio teléfono cuando está disponible.</p>
+      <ul><li>Supresión de ruido, control de ganancia y cancelación de eco</li><li>Ganancia ajustable con medidor en vivo · micrófono «sin procesar» para música</li></ul></div></div>
+
+    <div class="card"><div class="ico" style="background:rgba(102,187,106,.14)"><svg width="6mm" height="6mm" viewBox="0 0 24 24"><path fill="#66bb6a" d="M12 2 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5l-8-3zm-1 14-4-4 1.4-1.4L11 13.2l4.6-4.6L17 10l-6 6z"/></svg></div>
+      <div><h3>Nunca pierde una grabación</h3><p>Si el teléfono se apaga o la app se cierra de golpe, al volver a abrirla la grabación se recupera.</p>
+      <ul><li>Se pausa sola en llamadas (incluidas las de WhatsApp)</li><li>Avisa si otra app toma el micrófono o falta espacio</li></ul></div></div>
+
+    <div class="card"><div class="ico" style="background:rgba(171,71,188,.15)"><svg width="6mm" height="6mm" viewBox="0 0 24 24"><path fill="#ce93d8" d="M4 4h16v4H4zm0 6h16v4H4zm0 6h16v4H4z"/></svg></div>
+      <div><h3>Estante de cassettes</h3><p>Cada grabación es un cassette distinto: 12 estilos que rotan solos o que elegís a mano.</p>
+      <ul><li>Nombre a mano en la etiqueta, fecha, duración, tamaño y calidad</li><li>Buscar, ordenar, renombrar y eliminar</li></ul></div></div>
+
+    <div class="card"><div class="ico" style="background:rgba(37,211,102,.13)"><svg width="6mm" height="6mm" viewBox="0 0 24 24"><path fill="#7be495" d="M4 4h16v12H7l-3 3V4zm4 5h8v2H8zm0-3h8v2H8z"/></svg></div>
+      <div><h3>Compartir en un toque</h3><p>Botón directo a WhatsApp (también Business) o a cualquier app: Gmail, Drive, Telegram…</p>
+      <ul><li>Convierte un WAV pesado a M4A unas 10 veces más liviano antes de enviarlo</li></ul></div></div>
+
+    <div class="card"><div class="ico" style="background:rgba(255,255,255,.08)"><svg width="6mm" height="6mm" viewBox="0 0 24 24"><path fill="#f3e9d2" d="M12 3a9 9 0 1 0 0 18c.8 0 1.5-.7 1.5-1.5 0-.4-.1-.7-.4-1-.2-.3-.4-.6-.4-1 0-.8.7-1.5 1.5-1.5H16a5 5 0 0 0 5-5c0-4.4-4-8-9-8zM6.5 12a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3-4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3 4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg></div>
+      <div><h3>4 temas de colección</h3><p>Metálico 80, Retro deportivo, Negro periodista y Madera 70: cambian los materiales, los colores y las tipografías del aparato.</p></div></div>
+
+    <div class="card"><div class="ico" style="background:rgba(229,57,53,.15)"><svg width="6mm" height="6mm" viewBox="0 0 24 24"><path fill="#ff5a4e" d="M12 1 3 5v6c0 5.5 3.8 10.7 9 12 5.2-1.3 9-6.5 9-12V5l-9-4zm0 6a3 3 0 1 1 0 6 3 3 0 0 1 0-6z"/></svg></div>
+      <div><h3>Privacidad total</h3><p>Sin cuentas, sin anuncios, sin servidores. Los audios quedan en tu teléfono (en la carpeta de la app, en Música o en la que elijas, incluida la tarjeta SD).</p></div></div>
+  </div>
+
+  <div class="foot"><span><b>KB-007 Spy Recorder</b> · Características</span><span>03</span></div>
+</section>
+
+<!-- ========================= PÁGINA 4: GALERÍA ========================= -->
+<section class="page">
+  <div class="eyebrow">Capturas</div>
+  <h2>Elegí tu aparato.<br><em>Cada cassette, único.</em></h2>
+
+  <div class="gallery">
+    <figure><div class="gal-img"><img src="img/metal.png"></div><figcaption><b>Metálico 80</b>Grabando</figcaption></figure>
+    <figure><div class="gal-img"><img src="img/sport.png"></div><figcaption><b>Retro deportivo</b>Reproduciendo</figcaption></figure>
+    <figure><div class="gal-img"><img src="img/reporter.png"></div><figcaption><b>Negro periodista</b>Sin cassette</figcaption></figure>
+    <figure><div class="gal-img" style="background:linear-gradient(#3e2a1e,#1a110c)"><img src="img/wood.png"></div><figcaption><b>Madera 70</b>Grabando</figcaption></figure>
+  </div>
+
+  <div class="wide">
+    <div>
+      <h3>12 estilos de cassette</h3>
+      <p style="margin-bottom:3mm">Carcasas transparentes o sólidas, etiquetas con franjas, degradés, cuadros, lunares y diagonales, y distintos tipos de cinta. En el estante no se confunde ninguna grabación.</p>
+      <div class="shot"><img src="img/styles.png"></div>
+    </div>
+    <div>
+      <h3>Estante de grabaciones</h3>
+      <p style="margin-bottom:3mm">Todo de un vistazo, y cargar, renombrar, cambiar el estilo o compartir en un toque.</p>
+      <div class="shot"><img src="img/library.png"></div>
+    </div>
+  </div>
+
+  <div class="foot"><span><b>KB-007 Spy Recorder</b> · Galería</span><span>04</span></div>
+</section>
+
+<!-- ========================= PÁGINA 5: VENTAJAS ========================= -->
+<section class="page">
+  <div class="eyebrow">Ventajas y beneficios</div>
+  <h2>Por qué <em>KB-007</em><br>y no otra grabadora.</h2>
+
+  <div class="box" style="margin-top:6mm">
+    <table>
+      <tr><th>Función</th><th>KB-007 Spy Recorder</th><th>Grabadora común</th></tr>
+      <tr><td>Empieza a grabar por voz, con la pantalla apagada</td><td class="yes">Sí, con tu palabra secreta</td><td class="no">No</td></tr>
+      <tr><td>Guarda lo dicho antes de empezar</td><td class="yes">Sí, de 2 a 5 s de pre-grabación</td><td class="no">No</td></tr>
+      <tr><td>Reconocimiento de voz sin internet</td><td class="yes">Sí, 100 % en el teléfono</td><td class="no">—</td></tr>
+      <tr><td>Recupera el audio si se apaga el teléfono</td><td class="yes">Sí, automáticamente</td><td class="no">Suele perderse</td></tr>
+      <tr><td>Pausa automática en llamadas</td><td class="yes">Sí (también WhatsApp)</td><td class="no">Variable</td></tr>
+      <tr><td>Formatos AAC, Opus y WAV</td><td class="yes">Los tres, hasta 48 kHz estéreo</td><td class="no">Generalmente uno</td></tr>
+      <tr><td>Compartir directo a WhatsApp</td><td class="yes">Sí, y convierte WAV a M4A</td><td class="no">A veces</td></tr>
+      <tr><td>Diseño y experiencia</td><td class="yes">Walkman animado, 4 temas, sonidos y vibración</td><td class="no">Botón rojo y lista</td></tr>
+      <tr><td>Publicidad y cuentas</td><td class="yes">Sin anuncios, sin registro</td><td class="no">Variable</td></tr>
+    </table>
+  </div>
+
+  <div class="uses">
+    <div class="use"><div class="t">🎙️ Periodistas</div><p>Entrevistas y declaraciones con el teléfono en el bolsillo. Arranca con una palabra, sin desbloquear.</p></div>
+    <div class="use"><div class="t">🎸 Músicos</div><p>Ensayos en WAV o AAC de alta calidad, en estéreo y con el micrófono sin procesar.</p></div>
+    <div class="use"><div class="t">🎓 Estudiantes</div><p>Clases completas sin cortes. Pausa sola si entra una llamada.</p></div>
+    <div class="use"><div class="t">💼 Reuniones</div><p>Preset «Reunión» con reducción de ruido. Se comparte por mail o WhatsApp al terminar.</p></div>
+    <div class="use"><div class="t">💡 Ideas al vuelo</div><p>Manejando, cocinando o caminando: «atención grabadora», y la idea queda guardada.</p></div>
+    <div class="use"><div class="t">📝 Notas personales</div><p>Diario de voz, recordatorios y listas, con un cassette distinto para cada uno.</p></div>
+  </div>
+
+  <div class="foot"><span><b>KB-007 Spy Recorder</b> · Ventajas</span><span>05</span></div>
+</section>
+
+<!-- ========================= PÁGINA 6: FICHA TÉCNICA ========================= -->
+<section class="page">
+  <div class="eyebrow">Ficha técnica y compatibilidad</div>
+  <h2>Compatible con tu <em>Android</em>.</h2>
+
+  <div class="two">
+    <div class="box">
+      <h3>Compatibilidad</h3>
+      <table>
+        <tr><td>Sistema</td><td>Android 8.0 (Oreo) o superior · optimizada para Android 14 y 15</td></tr>
+        <tr><td>Procesador</td><td>ARM de 64 y 32 bits (prácticamente todos los teléfonos)</td></tr>
+        <tr><td>Pantallas</td><td>Teléfonos y tablets · vertical y horizontal</td></tr>
+        <tr><td>OGG/Opus</td><td>Android 10 o superior</td></tr>
+        <tr><td>Marcas</td><td>Cualquier marca con Android 8.0+ · incluye guía de batería para Samsung, Xiaomi, Huawei y OnePlus</td></tr>
+        <tr><td>Tamaño</td><td>79 MB (incluye el reconocedor de voz)</td></tr>
+        <tr><td>Idioma</td><td>Español</td></tr>
+        <tr><td>Internet</td><td>No necesita</td></tr>
+      </table>
+    </div>
+    <div class="box">
+      <h3>Audio</h3>
+      <table>
+        <tr><td>Formatos</td><td>M4A/AAC · OGG/Opus · WAV PCM 16 bits</td></tr>
+        <tr><td>Frecuencias</td><td>16 · 22,05 · 44,1 · 48 kHz</td></tr>
+        <tr><td>Bitrate</td><td>64 · 96 · 128 · 192 · 256 kbps</td></tr>
+        <tr><td>Canales</td><td>Mono / estéreo (según el equipo)</td></tr>
+        <tr><td>Fuentes</td><td>Estándar · voz · sin procesar · cámara/externo</td></tr>
+        <tr><td>Corte automático</td><td>Por silencio o por duración máxima</td></tr>
+        <tr><td>Destino</td><td>Carpeta de la app · Música/KB-007 · cualquier carpeta o SD</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="two" style="margin-top:4mm">
+    <div class="box">
+      <h3>Permisos (y para qué)</h3>
+      <table>
+        <tr><td>Micrófono</td><td>Grabar y escuchar tu palabra clave</td></tr>
+        <tr><td>Notificaciones</td><td>Mostrar el estado y los botones mientras graba</td></tr>
+        <tr><td>Segundo plano</td><td>Seguir funcionando con la pantalla apagada</td></tr>
+        <tr><td>Batería sin restricciones</td><td>Que el sistema no corte la escucha (opcional)</td></tr>
+      </table>
+      <p style="margin-top:2.5mm; font-size:8pt">Antes de cada pedido de permiso, la app explica para qué lo necesita.</p>
+    </div>
+    <div class="box">
+      <h3>Instalación en 3 pasos</h3>
+      <div class="steps" style="margin-top:0">
+        <div class="step"><div class="n">1</div><div><h3>Descargá el APK</h3><p>En el teléfono, desde el enlace o archivo recibido.</p></div></div>
+        <div class="step"><div class="n">2</div><div><h3>Permití la instalación</h3><p>Activá «instalar apps desconocidas» para el navegador o Archivos.</p></div></div>
+        <div class="step"><div class="n">3</div><div><h3>Abrí KB-007</h3><p>Aceptá el micrófono y las notificaciones, y pulsá REC.</p></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="end">
+    <div>
+      <div class="brand">KB<span class="dash">-</span>007</div>
+      <div class="spy">SPY RECORDER</div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-size:13pt; font-weight:700">Decí la palabra. Ya está grabando.</div>
+      <div style="font-size:9pt; color:var(--muted); margin-top:1.5mm">Grabadora de cassette inteligente para Android · v1.1.0</div>
+    </div>
+  </div>
+
+  <div class="foot"><span><b>KB-007 Spy Recorder</b> · Ficha técnica</span><span>06</span></div>
+</section>
+
+</body>
+</html>
