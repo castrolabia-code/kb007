@@ -67,6 +67,11 @@ class LibraryViewModel(app: Application) : AndroidViewModel(app) {
         if (loaded?.id == r.id) c.recordings.get(r.id)?.let { c.player.updateLoaded(it) }
     }
 
+    fun setStyle(r: Recording, style: Int) = viewModelScope.launch {
+        c.recordings.setStyle(r.id, style)
+        if (c.player.state.value.loaded?.id == r.id) c.recordings.get(r.id)?.let { c.player.updateLoaded(it) }
+    }
+
     fun delete(r: Recording) = viewModelScope.launch {
         if (c.player.state.value.loaded?.id == r.id) c.player.eject()
         c.recordings.delete(r)

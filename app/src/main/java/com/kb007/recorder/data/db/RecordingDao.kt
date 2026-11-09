@@ -32,6 +32,9 @@ interface RecordingDao {
     @Query("UPDATE recordings SET title = :title WHERE id = :id")
     suspend fun rename(id: Long, title: String)
 
+    @Query("UPDATE recordings SET cassetteStyle = :style WHERE id = :id")
+    suspend fun setStyle(id: Long, style: Int)
+
     @Query("DELETE FROM recordings WHERE id = :id")
     suspend fun delete(id: Long)
 }

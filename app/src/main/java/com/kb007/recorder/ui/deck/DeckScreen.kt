@@ -289,17 +289,19 @@ private fun CassetteBay(theme: KbTheme, ui: DeckUi, reels: ReelAnimState, u: Dp)
     val slide = remember { Animatable(0f) }
     var shownTitle by remember { mutableStateOf(ui.tapeTitle) }
     var shownHasTape by remember { mutableStateOf(ui.hasTape) }
+    var shownStyle by remember { mutableStateOf(ui.tapeStyle) }
     LaunchedEffect(ui.tapeId, ui.hasTape) {
         if (shownHasTape) slide.animateTo(1f, tween(260)) // sale el cassette anterior
         shownHasTape = ui.hasTape
         shownTitle = ui.tapeTitle
+        shownStyle = ui.tapeStyle
         if (ui.hasTape) {
             slide.snapTo(1f)
             slide.animateTo(0f, spring(dampingRatio = 0.7f, stiffness = Spring.StiffnessMediumLow))
         } else slide.snapTo(0f)
     }
     // El título puede cambiar sin cambiar de cassette (renombrar).
-    LaunchedEffect(ui.tapeTitle) { if (ui.hasTape) shownTitle = ui.tapeTitle }
+    LaunchedEffect(ui.tapeTitle, ui.tapeStyle) { if (ui.hasTape) { shownTitle = ui.tapeTitle; shownStyle = ui.tapeStyle } }
 
     Box(
         Modifier.fillMaxWidth().aspectRatio(1.52f)
@@ -314,8 +316,8 @@ private fun CassetteBay(theme: KbTheme, ui: DeckUi, reels: ReelAnimState, u: Dp)
         Canvas(Modifier.fillMaxSize()) { drawEmptyMechanism(reels) }
         if (shownHasTape) {
             Cassette(
-                theme, shownTitle, ui.progress, reels.left, reels.right,
-                Modifier.fillMaxWidth(0.88f).aspectRatio(CASSETTE_ASPECT)
+                theme, shownTitle, ui.progress, reels.left, reels.right, style = shownStyle,
+                modifier = Modifier.fillMaxWidth(0.88f).aspectRatio(CASSETTE_ASPECT)
                     .graphicsLayer {
                         translationY = -size.height * 1.25f * slide.value
                         alpha = 1f - slide.value * 0.6f

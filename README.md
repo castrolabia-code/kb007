@@ -8,9 +8,9 @@ escuchar una **palabra clave** que elegís vos, incluso con la pantalla apagada.
 |---|---|---|---|
 | ![](docs/capturas/deck_metal80_rec.png) | ![](docs/capturas/deck_sport_play.png) | ![](docs/capturas/deck_reporter_empty.png) | ![](docs/capturas/deck_wood70_rec.png) |
 
-| Estante de cassettes | Ajustes |
-|---|---|
-| ![](docs/capturas/library_metal80.png) | ![](docs/capturas/settings_reporter.png) |
+| Estante de cassettes | Estilos de cassette | Ajustes |
+|---|---|---|
+| ![](docs/capturas/library_metal80.png) | ![](docs/capturas/cassette_styles.png) | ![](docs/capturas/settings_reporter.png) |
 
 ---
 
@@ -85,6 +85,8 @@ Tests:
 
 - **Contador**: tocalo para ponerlo en 000.
 - **LISTA**: estante de cassettes. Tocar una grabación la *carga* en el aparato.
+  Cada grabación tiene **su propio cassette** (12 estilos que rotan automáticamente: colores, carcasa
+  transparente o sólida, dibujo de la etiqueta, tipo de cinta y tinta). Con **Estilo** elegís otro a mano.
 - **AJUSTES**: calidad, procesamiento, palabra clave, almacenamiento y tema.
 - **Switch PALABRA CLAVE**: activa o desactiva la escucha. LED ámbar fijo = escuchando; parpadeando = cargando el modelo.
 
@@ -254,6 +256,11 @@ app/src/main/java/com/kb007/recorder/
    ├─ permissions/ explicación previa a cada permiso
    └─ fx/        DeckFx (sonidos sintetizados + vibración)
 ```
+
+### Agregar un estilo de cassette
+En `ui/deck/CassetteStyle.kt`, sumá un `CassetteStyle(...)` a la lista `ALL`: colores, dibujo de la
+etiqueta (`LabelPattern`), marca de fantasía, tipo y duración. Las grabaciones nuevas lo incorporan a
+la rotación automática.
 
 ### Agregar un tema nuevo
 En `ui/theme/KbThemes.kt`, creá un `val miTema = KbTheme(id = "mi_tema", …)` con colores, material

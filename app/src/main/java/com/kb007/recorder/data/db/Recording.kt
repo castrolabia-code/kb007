@@ -1,5 +1,6 @@
 package com.kb007.recorder.data.db
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
@@ -27,6 +28,8 @@ data class Recording(
     val trigger: TriggerType,
     val keyword: String? = null,
     val status: RecordingStatus = RecordingStatus.RECORDING,
+    /** Estética del cassette elegida a mano (índice en CassetteStyle.ALL); -1 = automática. */
+    @ColumnInfo(defaultValue = "-1") val cassetteStyle: Int = -1,
 ) {
     /** Descripción corta de formato y calidad, p.ej. "M4A · 44,1 kHz · 128 kbps · mono". */
     val qualityLabel: String

@@ -15,6 +15,11 @@ import com.kb007.recorder.ui.library.LibraryUi
 import com.kb007.recorder.ui.library.SortBy
 import com.kb007.recorder.ui.theme.KbThemes
 import org.junit.Rule
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.unit.dp
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
@@ -30,6 +35,9 @@ class LibraryScreenshotTest {
         Recording(1, "Ensayo jueves", "file:///x", "", AudioFormatType.AAC_M4A, 48_000, 2, 192, 754_000, 18_200_000, 1_762_000_000_000, TriggerType.MANUAL),
         Recording(2, "Idea de canción", "file:///y", "", AudioFormatType.OPUS_OGG, 48_000, 1, 64, 95_000, 760_000, 1_761_900_000_000, TriggerType.KEYWORD, "grabadora"),
         Recording(3, "Reunión de equipo", "file:///z", "", AudioFormatType.WAV_PCM, 44_100, 1, 0, 3_725_000, 328_000_000, 1_761_500_000_000, TriggerType.MANUAL, status = RecordingStatus.RECOVERED),
+        Recording(4, "Clase de guitarra", "file:///w", "", AudioFormatType.AAC_M4A, 44_100, 1, 128, 1_800_000, 28_000_000, 1_761_400_000_000, TriggerType.MANUAL),
+        Recording(5, "Nota para Juan", "file:///v", "", AudioFormatType.AAC_M4A, 22_050, 1, 64, 42_000, 340_000, 1_761_300_000_000, TriggerType.KEYWORD, "grabadora"),
+        Recording(6, "Entrevista", "file:///u", "", AudioFormatType.AAC_M4A, 48_000, 1, 96, 2_400_000, 29_000_000, 1_761_200_000_000, TriggerType.MANUAL, cassetteStyle = 7),
     )
 
     private val actions = object : LibraryActions {
@@ -37,6 +45,7 @@ class LibraryScreenshotTest {
         override fun setQuery(q: String) = Unit
         override fun setSort(s: SortBy) = Unit
         override fun load(r: Recording) = Unit
+        override fun setStyle(r: Recording, style: Int) = Unit
         override fun rename(r: Recording, title: String) = Unit
         override fun delete(r: Recording) = Unit
         override fun share(r: Recording, toWhatsApp: Boolean, convert: Boolean) = Unit
@@ -45,12 +54,28 @@ class LibraryScreenshotTest {
     }
 
     @Test fun shelfMetal() {
-        compose.setContent { LibraryScreen(LibraryUi(items, 3), KbThemes.metal80, actions, null) }
+        compose.setContent { LibraryScreen(LibraryUi(items, 6), KbThemes.metal80, actions, null) }
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/library_metal80.png")
     }
 
+    @Test fun styleCatalog() {
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(androidx.compose.ui.Modifier.background(androidx.compose.ui.graphics.Color(0xFF222222))) {
+                com.kb007.recorder.ui.deck.CassetteStyle.ALL.chunked(3).forEach { row ->
+                    androidx.compose.foundation.layout.Row {
+                        row.forEach { st ->
+                            com.kb007.recorder.ui.deck.Cassette(KbThemes.metal80, st.name, 0.4f, 0f, 30f,
+                                androidx.compose.ui.Modifier.padding(6.dp).width(125.dp).aspectRatio(com.kb007.recorder.ui.deck.CASSETTE_ASPECT), style = st)
+                        }
+                    }
+                }
+            }
+        }
+        compose.onRoot().captureRoboImage("build/outputs/roborazzi/cassette_styles.png")
+    }
+
     @Test fun shelfWood() {
-        compose.setContent { LibraryScreen(LibraryUi(items, 3, sort = SortBy.DURATION), KbThemes.wood70, actions, null) }
+        compose.setContent { LibraryScreen(LibraryUi(items, 6, sort = SortBy.DURATION), KbThemes.wood70, actions, null) }
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/library_wood70.png")
     }
 }

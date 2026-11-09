@@ -15,7 +15,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.text.TextStyle
@@ -66,10 +66,13 @@ fun Cassette(
     rightAngle: Float,
     modifier: Modifier = Modifier,
     side: String = "A",
+    /** Estética propia de este cassette; null = la del tema del aparato. */
+    style: CassetteStyle? = null,
 ) {
     val measurer = rememberTextMeasurer()
-    val handStyle = remember(theme) { TextStyle(fontFamily = theme.labelFont, color = theme.labelInk, fontWeight = FontWeight.Medium) }
-    val brandStyle = remember(theme) { TextStyle(fontFamily = FontFamily.SansSerif, fontWeight = FontWeight.Black, color = theme.labelStripe) }
+    val st = remember(theme, style) { style ?: CassetteStyle.fromTheme(theme) }
+    val handStyle = remember(theme, st) { TextStyle(fontFamily = theme.labelFont, color = st.ink, fontWeight = FontWeight.Medium) }
+    val brandStyle = remember(st) { TextStyle(fontFamily = FontFamily.SansSerif, fontWeight = FontWeight.Black, color = st.printInk) }
 
     Canvas(modifier) {
         val w = size.width
@@ -79,18 +82,18 @@ fun Cassette(
         val hubR = Offset(w * (0.5f + CassetteGeom.HUB_X_OFFSET), h * CassetteGeom.HUB_Y)
         val (rl, rr) = CassetteGeom.packRadii(progress)
         val window = Rect(w * 0.365f, h * 0.36f, w * 0.635f, h * 0.535f)
-        val transparent = theme.shellAlpha < 1f
+        val transparent = st.shellAlpha < 1f
 
         // ---- Sombra y fondo de carcasa ----
         drawRoundRect(Color.Black.copy(alpha = 0.35f), Offset(w * 0.008f, h * 0.02f), size, CornerRadius(corner))
-        drawRoundRect(theme.shell.copy(alpha = if (transparent) theme.shellAlpha * 0.6f else 1f), cornerRadius = CornerRadius(corner))
+        drawRoundRect(st.shell.copy(alpha = if (transparent) st.shellAlpha * 0.6f else 1f), cornerRadius = CornerRadius(corner))
 
         // ---- Rollos de cinta y cubos (detrás de la tapa) ----
         drawTapePack(hubL, rl * w, theme.tape)
         drawTapePack(hubR, rr * w, theme.tape)
         drawTapePath(w, h, hubL, rl * w, hubR, rr * w, theme.tape)
-        drawHub(hubL, CassetteGeom.HUB_R * w, leftAngle, theme.hub)
-        drawHub(hubR, CassetteGeom.HUB_R * w, rightAngle, theme.hub)
+        drawHub(hubL, CassetteGeom.HUB_R * w, leftAngle, st.hub)
+        drawHub(hubR, CassetteGeom.HUB_R * w, rightAngle, st.hub)
 
         // ---- Tapa frontal: con agujeros para la ventanita y los cubos ----
         val front = Path().apply {
@@ -101,7 +104,7 @@ fun Cassette(
             addOval(Rect(hubR, CassetteGeom.HUB_R * w * 1.18f))
             addPath(headArea(w, h, inset = 0.012f))
         }
-        drawPath(front, theme.shell.copy(alpha = theme.shellAlpha))
+        drawPath(front, st.shell.copy(alpha = st.shellAlpha))
         if (transparent) drawPath(front, Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.10f), Color.Black.copy(alpha = 0.10f))))
 
         // ---- Etiqueta (con recorte de ventana y cubos) ----
@@ -113,32 +116,34 @@ fun Cassette(
             addOval(Rect(hubL, CassetteGeom.HUB_R * w * 1.32f))
             addOval(Rect(hubR, CassetteGeom.HUB_R * w * 1.32f))
         }
-        drawPath(label, theme.label)
-        // Franja de color de la etiqueta (alrededor de la ventana)
-        clipRect(labelRect.left, h * 0.30f, labelRect.right, h * 0.59f) {
-            drawPath(label, theme.labelStripe.copy(alpha = 0.85f))
+        drawPath(label, st.label)
+        // Dibujo de la etiqueta (zona alrededor de la ventana), propio de cada estilo
+        clipPath(label) { drawLabelPattern(st, labelRect, w, h) }
+        // Zona blanca para escribir el título (en los diseños que la tapan)
+        if (st.pattern == LabelPattern.RAINBOW) {
+            drawRoundRect(st.label, Offset(labelRect.left + w * 0.09f, h * 0.085f), Size(labelRect.width - w * 0.13f, h * 0.17f), CornerRadius(w * 0.008f))
         }
         // Renglones para escribir
         for (i in 1..2) {
             val y = h * (0.12f + i * 0.06f)
-            drawLine(theme.labelLines, Offset(labelRect.left + w * 0.06f, y), Offset(labelRect.right - w * 0.06f, y), strokeWidth = h * 0.006f)
+            drawLine(st.lines, Offset(labelRect.left + w * 0.06f, y), Offset(labelRect.right - w * 0.06f, y), strokeWidth = h * 0.006f)
         }
-        // Lado y marca
+        // Lado, marca, tipo de cinta y duración (marcas de fantasía)
         drawText(measurer, side, Offset(labelRect.left + w * 0.018f, h * 0.075f),
-            style = brandStyle.copy(fontSize = (h * 0.11f).toSp(), color = theme.labelInk))
-        drawText(measurer, "KB-007", Offset(window.right + w * 0.03f, h * 0.60f),
-            style = brandStyle.copy(fontSize = (h * 0.055f).toSp(), letterSpacing = (h * 0.01f).toSp()))
-        drawText(measurer, "C-60", Offset(labelRect.left + w * 0.03f, h * 0.60f),
-            style = brandStyle.copy(fontSize = (h * 0.05f).toSp(), color = theme.labelInk.copy(alpha = 0.7f)))
+            style = brandStyle.copy(fontSize = (h * 0.11f).toSp(), color = st.ink))
+        val brand = measurer.measure(st.brand, brandStyle.copy(fontSize = (h * 0.055f).toSp(), letterSpacing = (h * 0.008f).toSp()))
+        drawText(brand, topLeft = Offset(labelRect.right - w * 0.025f - brand.size.width, h * 0.60f))
+        drawText(measurer, "${st.length} · ${st.tapeType}", Offset(labelRect.left + w * 0.03f, h * 0.605f),
+            style = brandStyle.copy(fontSize = (h * 0.045f).toSp(), color = st.printInk.copy(alpha = 0.8f)))
 
         // Título manuscrito (levemente torcido, como escrito a mano)
         val text = title ?: "— sin cassette —"
         val layout = measurer.measure(
-            text, handStyle.copy(fontSize = (h * 0.085f).toSp(), color = if (title == null) theme.labelInk.copy(alpha = 0.45f) else theme.labelInk),
+            text, handStyle.copy(fontSize = (h * 0.085f).toSp(), color = if (title == null) st.ink.copy(alpha = 0.45f) else st.ink),
             maxLines = 1, overflow = TextOverflow.Ellipsis,
             constraints = androidx.compose.ui.unit.Constraints(maxWidth = (labelRect.width * 0.78f).toInt()),
         )
-        rotate(-1.8f, Offset(w * 0.5f, h * 0.17f)) {
+        rotate(st.slant, Offset(w * 0.5f, h * 0.17f)) {
             drawText(layout, topLeft = Offset(w * 0.5f - layout.size.width / 2f, h * 0.215f - layout.size.height))
         }
 
@@ -151,7 +156,7 @@ fun Cassette(
 
         // ---- Zona de cabezales (trapecio inferior) ----
         val head = headArea(w, h, inset = 0f)
-        drawPath(head, theme.shell.copy(alpha = if (transparent) 0.5f else 1f))
+        drawPath(head, st.shell.copy(alpha = if (transparent) 0.5f else 1f))
         drawPath(head, Color.Black.copy(alpha = 0.18f), style = Stroke(w * 0.003f))
         // Agujeros: guías, cabezal y cabrestantes
         val hy = h * 0.915f
@@ -173,6 +178,67 @@ fun Cassette(
         }
         drawPath(glare, Brush.linearGradient(listOf(Color.White.copy(alpha = 0.16f), Color.White.copy(alpha = 0.02f)), Offset.Zero, Offset(w * 0.4f, h)))
         drawRoundRect(Color.Black.copy(alpha = 0.4f), cornerRadius = CornerRadius(corner), style = Stroke(w * 0.004f))
+    }
+}
+
+/** Dibujo de la etiqueta según el estilo. Se llama ya recortado a la forma de la etiqueta. */
+private fun DrawScope.drawLabelPattern(st: CassetteStyle, r: Rect, w: Float, h: Float) {
+    val top = h * 0.30f
+    val bottom = h * 0.59f
+    when (st.pattern) {
+        LabelPattern.BAND -> drawRect(st.accent.copy(alpha = 0.88f), Offset(r.left, top), Size(r.width, bottom - top))
+        LabelPattern.SOLID -> {
+            drawRect(st.accent.copy(alpha = 0.35f), Offset(r.left, top), Size(r.width, bottom - top))
+            drawRect(st.accent, Offset(r.left, bottom - h * 0.03f), Size(r.width, h * 0.03f))
+        }
+        LabelPattern.DOUBLE_STRIPE -> {
+            val bh = (bottom - top) / 2f
+            drawRect(st.accent, Offset(r.left, top), Size(r.width, bh))
+            drawRect(st.accent2, Offset(r.left, top + bh), Size(r.width, bh))
+            drawRect(st.label, Offset(r.left, top + bh - h * 0.006f), Size(r.width, h * 0.012f))
+        }
+        LabelPattern.GRADIENT -> drawRect(
+            Brush.horizontalGradient(listOf(st.accent, st.accent2, st.accent), r.left, r.right), Offset(r.left, top), Size(r.width, bottom - top),
+        )
+        LabelPattern.RAINBOW -> {
+            val colors = listOf(Color(0xFFE53935), Color(0xFFFF9800), Color(0xFFFFEB3B), Color(0xFF43A047), Color(0xFF1E88E5), Color(0xFF8E24AA))
+            val sh = (r.height) / colors.size
+            colors.forEachIndexed { i, c -> drawRect(c, Offset(r.left, r.top + i * sh), Size(r.width, sh + 1f)) }
+        }
+        LabelPattern.CHECKER -> {
+            val cell = (bottom - top) / 6f
+            var y = top
+            var row = 0
+            while (y < bottom - 1f) {
+                var x = r.left
+                var col = 0
+                while (x < r.right) {
+                    drawRect(if ((row + col) % 2 == 0) st.accent else st.accent2, Offset(x, y), Size(cell, cell))
+                    x += cell; col++
+                }
+                y += cell; row++
+            }
+        }
+        LabelPattern.DIAGONAL -> {
+            drawRect(st.accent2.copy(alpha = 0.25f), Offset(r.left, top), Size(r.width, bottom - top))
+            val step = w * 0.05f
+            var x = r.left - (bottom - top)
+            while (x < r.right) {
+                drawLine(st.accent, Offset(x, bottom), Offset(x + (bottom - top), top), strokeWidth = step * 0.45f)
+                x += step
+            }
+        }
+        LabelPattern.DOTS -> {
+            drawRect(st.accent.copy(alpha = 0.22f), Offset(r.left, top), Size(r.width, bottom - top))
+            val step = w * 0.04f
+            var y = top + step / 2
+            var row = 0
+            while (y < bottom) {
+                var x = r.left + step / 2 + (if (row % 2 == 0) 0f else step / 2)
+                while (x < r.right) { drawCircle(st.accent, step * 0.22f, Offset(x, y)); x += step }
+                y += step; row++
+            }
+        }
     }
 }
 

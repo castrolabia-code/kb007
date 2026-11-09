@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -65,6 +66,14 @@ import com.kb007.recorder.data.db.Recording
 import com.kb007.recorder.data.db.RecordingStatus
 import com.kb007.recorder.data.prefs.TriggerType
 import com.kb007.recorder.ui.deck.Cassette
+import com.kb007.recorder.ui.deck.CassetteStyle
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.material.icons.filled.Palette
+import androidx.compose.ui.graphics.luminance
 import com.kb007.recorder.ui.deck.formatTime
 import com.kb007.recorder.ui.theme.KbTheme
 import java.text.SimpleDateFormat
@@ -77,6 +86,8 @@ interface LibraryActions {
     fun setQuery(q: String)
     fun setSort(s: SortBy)
     fun load(r: Recording)
+    /** Cambia la estética del cassette ([style] índice en CassetteStyle.ALL, -1 = automática). */
+    fun setStyle(r: Recording, style: Int)
     fun rename(r: Recording, title: String)
     fun delete(r: Recording)
     fun share(r: Recording, toWhatsApp: Boolean, convert: Boolean)
@@ -96,6 +107,7 @@ fun formatSize(bytes: Long): String = when {
 @Composable
 fun LibraryScreen(ui: LibraryUi, theme: KbTheme, actions: LibraryActions, message: String?) {
     var renaming by remember { mutableStateOf<Recording?>(null) }
+    var styling by remember { mutableStateOf<Recording?>(null) }
     var deleting by remember { mutableStateOf<Recording?>(null) }
     var sharing by remember { mutableStateOf<Pair<Recording, Boolean>?>(null) } // (grabación, aWhatsApp) pendiente de decidir conversión
 
@@ -156,7 +168,7 @@ fun LibraryScreen(ui: LibraryUi, theme: KbTheme, actions: LibraryActions, messag
                     items(ui.items, key = { it.id }) { r ->
                         CassetteCase(
                             r, theme, waInstalled = actions.whatsAppInstalled(),
-                            onLoad = { actions.load(r) }, onRename = { renaming = r }, onDelete = { deleting = r },
+                            onLoad = { actions.load(r) }, onRename = { renaming = r }, onDelete = { deleting = r }, onStyle = { styling = r },
                             onWhatsApp = { requestShare(r, true) }, onShare = { requestShare(r, false) },
                         )
                     }
@@ -171,6 +183,9 @@ fun LibraryScreen(ui: LibraryUi, theme: KbTheme, actions: LibraryActions, messag
     }
 
     // ---------- Diálogos ----------
+    styling?.let { r ->
+        StylePickerDialog(r, theme, onPick = { idx -> actions.setStyle(r, idx); styling = null }, onDismiss = { styling = null })
+    }
     renaming?.let { r ->
         var text by remember(r.id) { mutableStateOf(r.title) }
         AlertDialog(
@@ -236,10 +251,12 @@ private fun CassetteCase(
     waInstalled: Boolean,
     onLoad: () -> Unit,
     onRename: () -> Unit,
+    onStyle: () -> Unit,
     onDelete: () -> Unit,
     onWhatsApp: () -> Unit,
     onShare: () -> Unit,
 ) {
+    val st = CassetteStyle.forRecording(r.id, r.cassetteStyle)
     val shape = RoundedCornerShape(10.dp)
     Column(
         Modifier.fillMaxWidth().clip(shape)
@@ -248,25 +265,25 @@ private fun CassetteCase(
             .clickable(onClick = onLoad),
     ) {
         Row(Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
-            Cassette(theme, r.title, progress = 0.5f, leftAngle = (r.id * 37 % 360).toFloat(), rightAngle = (r.id * 71 % 360).toFloat(),
+            Cassette(theme, r.title, progress = 0.5f, leftAngle = (r.id * 37 % 360).toFloat(), rightAngle = (r.id * 71 % 360).toFloat(), style = st,
                 modifier = Modifier.width(118.dp).aspectRatio(com.kb007.recorder.ui.deck.CASSETTE_ASPECT))
             Spacer(Modifier.width(12.dp))
             // J-card
             Column(
-                Modifier.weight(1f).clip(RoundedCornerShape(6.dp)).background(theme.label).padding(10.dp),
+                Modifier.weight(1f).clip(RoundedCornerShape(6.dp)).background(st.label).padding(10.dp),
                 verticalArrangement = Arrangement.spacedBy(3.dp),
             ) {
-                Box(Modifier.fillMaxWidth().height(4.dp).background(theme.labelStripe))
-                Text(r.title, style = TextStyle(fontFamily = theme.labelFont, fontSize = 18.sp, color = theme.labelInk), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text(esDate.format(Date(r.createdAt)).replaceFirstChar { it.uppercase() }, style = TextStyle(fontSize = 12.sp, color = theme.labelInk.copy(alpha = 0.8f)))
+                Box(Modifier.fillMaxWidth().height(4.dp).background(Brush.horizontalGradient(listOf(st.accent, st.accent2))))
+                Text(r.title, style = TextStyle(fontFamily = theme.labelFont, fontSize = 18.sp, color = st.ink), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(esDate.format(Date(r.createdAt)).replaceFirstChar { it.uppercase() }, style = TextStyle(fontSize = 12.sp, color = st.ink.copy(alpha = 0.8f)))
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Tag(formatTime(r.durationMs), theme)
-                    Tag(formatSize(r.sizeBytes), theme)
-                    Tag(if (r.trigger == TriggerType.KEYWORD) "CLAVE" + (r.keyword?.let { " «$it»" } ?: "") else "MANUAL", theme,
+                    Tag(formatTime(r.durationMs), st)
+                    Tag(formatSize(r.sizeBytes), st)
+                    Tag(if (r.trigger == TriggerType.KEYWORD) "CLAVE" + (r.keyword?.let { " «$it»" } ?: "") else "MANUAL", st,
                         highlight = r.trigger == TriggerType.KEYWORD)
-                    if (r.status == RecordingStatus.RECOVERED) Tag("RECUPERADA", theme, highlight = true)
+                    if (r.status == RecordingStatus.RECOVERED) Tag("RECUPERADA", st, highlight = true)
                 }
-                Text(r.qualityLabel, style = TextStyle(fontSize = 11.sp, color = theme.labelInk.copy(alpha = 0.7f), fontFamily = FontFamily.Monospace))
+                Text(r.qualityLabel, style = TextStyle(fontSize = 11.sp, color = st.ink.copy(alpha = 0.7f), fontFamily = FontFamily.Monospace))
             }
         }
         Row(
@@ -275,6 +292,7 @@ private fun CassetteCase(
         ) {
             CaseAction(Icons.Filled.PlayArrow, "Cargar", theme, onLoad)
             CaseAction(Icons.Filled.Edit, "Renombrar", theme, onRename)
+            CaseAction(Icons.Filled.Palette, "Estilo", theme, onStyle)
             if (waInstalled) CaseAction(Icons.Filled.Chat, "WhatsApp", theme, onWhatsApp, tint = Color(0xFF7BE495))
             CaseAction(Icons.Filled.Share, "Compartir", theme, onShare)
             CaseAction(Icons.Filled.Delete, "Eliminar", theme, onDelete, tint = Color(0xFFFF8A80))
@@ -283,23 +301,59 @@ private fun CassetteCase(
 }
 
 @Composable
-private fun Tag(text: String, theme: KbTheme, highlight: Boolean = false) {
+private fun Tag(text: String, st: CassetteStyle, highlight: Boolean = false) {
     Text(
         text,
-        Modifier.clip(RoundedCornerShape(4.dp)).background(if (highlight) theme.labelStripe else theme.labelInk.copy(alpha = 0.1f))
+        Modifier.clip(RoundedCornerShape(4.dp)).background(if (highlight) st.accent else st.ink.copy(alpha = 0.1f))
             .padding(horizontal = 6.dp, vertical = 1.dp),
-        style = TextStyle(fontSize = 11.sp, fontWeight = FontWeight.Bold, color = if (highlight) Color.White else theme.labelInk),
+        style = TextStyle(fontSize = 11.sp, fontWeight = FontWeight.Bold, color = if (highlight) (if (st.accent.luminance() > 0.5f) Color(0xFF111111) else Color.White) else st.ink),
         maxLines = 1, overflow = TextOverflow.Ellipsis,
     )
 }
 
 @Composable
-private fun CaseAction(icon: ImageVector, label: String, theme: KbTheme, onClick: () -> Unit, tint: Color = theme.label) {
+private fun RowScope.CaseAction(icon: ImageVector, label: String, theme: KbTheme, onClick: () -> Unit, tint: Color = theme.label) {
     Column(
-        Modifier.clip(RoundedCornerShape(8.dp)).clickable(onClick = onClick).padding(horizontal = 8.dp, vertical = 6.dp).widthIn(min = 52.dp),
+        Modifier.weight(1f).clip(RoundedCornerShape(8.dp)).clickable(onClick = onClick).padding(vertical = 6.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Icon(icon, null, tint = tint, modifier = Modifier.size(20.dp))
-        Text(label, color = tint, fontSize = 11.sp)
+        Text(label, color = tint, fontSize = 10.sp, maxLines = 1, softWrap = false, overflow = TextOverflow.Clip)
     }
+}
+
+/** Selector visual de estilo: todos los cassettes con el nombre de la grabación. */
+@Composable
+private fun StylePickerDialog(r: Recording, theme: KbTheme, onPick: (Int) -> Unit, onDismiss: () -> Unit) {
+    val current = if (r.cassetteStyle in CassetteStyle.ALL.indices) r.cassetteStyle else -1
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Estilo del cassette") },
+        text = {
+            LazyVerticalGrid(GridCells.Adaptive(130.dp), Modifier.heightIn(max = 460.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    val auto = CassetteStyle.autoIndex(r.id)
+                    Text(
+                        (if (current == -1) "✓ " else "") + "Automático (${CassetteStyle.ALL[auto].name})",
+                        Modifier.clip(RoundedCornerShape(8.dp)).background(if (current == -1) theme.accent.copy(alpha = 0.3f) else Color(0x22FFFFFF))
+                            .clickable { onPick(-1) }.padding(10.dp).fillMaxWidth(),
+                        fontSize = 14.sp,
+                    )
+                }
+                itemsIndexed(CassetteStyle.ALL) { i, st ->
+                    Column(
+                        Modifier.clip(RoundedCornerShape(8.dp))
+                            .border(if (i == current) 3.dp else 1.dp, if (i == current) theme.accent else Color.White.copy(alpha = 0.15f), RoundedCornerShape(8.dp))
+                            .clickable { onPick(i) }.padding(6.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Cassette(theme, r.title, 0.5f, i * 40f, i * 70f, Modifier.fillMaxWidth().aspectRatio(com.kb007.recorder.ui.deck.CASSETTE_ASPECT), style = st)
+                        Text(st.name, fontSize = 12.sp, maxLines = 1)
+                    }
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text("Cerrar") } },
+    )
 }

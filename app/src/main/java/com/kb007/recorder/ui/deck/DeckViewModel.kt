@@ -47,6 +47,8 @@ data class DeckUi(
     val status: String = "",
     /** Cambia cada vez que se inserta un cassette distinto (dispara la animación de carga). */
     val tapeId: Long = 0,
+    /** Estética del cassette cargado (cada grabación tiene la suya). */
+    val tapeStyle: CassetteStyle? = null,
 ) {
     companion object {
         const val TAPE_MIN = 0.04f
@@ -144,6 +146,11 @@ class DeckViewModel(app: Application) : AndroidViewModel(app), DeckActions {
             listening = e.listening, detectorReady = e.detectorReady, micOpen = e.micOpen,
             status = status,
             tapeId = if (recording) -(e.recordingId ?: 1) else (p.loaded?.id ?: 0),
+            tapeStyle = when {
+                recording && e.recordingId != null -> CassetteStyle.forRecording(e.recordingId, -1)
+                p.loaded != null -> CassetteStyle.forRecording(p.loaded.id, p.loaded.cassetteStyle)
+                else -> null
+            },
         )
     }
 

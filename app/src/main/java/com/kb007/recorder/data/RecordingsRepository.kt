@@ -23,6 +23,8 @@ class RecordingsRepository(private val dao: RecordingDao, private val storage: S
         dao.update(r.copy(title = title, uri = newUri))
     }
 
+    suspend fun setStyle(id: Long, style: Int) = withContext(Dispatchers.IO) { dao.setStyle(id, style) }
+
     suspend fun delete(r: Recording) = withContext(Dispatchers.IO) {
         if (r.uri.isNotEmpty()) storage.delete(Uri.parse(r.uri))
         dao.delete(r.id)

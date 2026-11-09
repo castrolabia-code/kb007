@@ -6,6 +6,8 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverter
 import androidx.room.TypeConverters
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.kb007.recorder.data.prefs.AudioFormatType
 import com.kb007.recorder.data.prefs.TriggerType
 
@@ -18,13 +20,20 @@ class Converters {
     @TypeConverter fun strToSt(v: String) = RecordingStatus.valueOf(v)
 }
 
-@Database(entities = [Recording::class], version = 1, exportSchema = true)
+@Database(entities = [Recording::class], version = 2, exportSchema = true)
 @TypeConverters(Converters::class)
 abstract class KbDatabase : RoomDatabase() {
     abstract fun recordings(): RecordingDao
 
     companion object {
+        /** v2: estética individual de cada cassette. Las grabaciones existentes quedan en "automática". */
+        val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE recordings ADD COLUMN cassetteStyle INTEGER NOT NULL DEFAULT -1")
+            }
+        }
+
         fun create(context: Context): KbDatabase =
-            Room.databaseBuilder(context, KbDatabase::class.java, "kb007.db").build()
+            Room.databaseBuilder(context, KbDatabase::class.java, "kb007.db").addMigrations(MIGRATION_1_2).build()
     }
 }

@@ -102,6 +102,7 @@ fun KbNavHost(theme: KbTheme, fx: DeckFx) {
                         deckVm.load(r); fx.press(DeckFx.Kind.EJECT); nav.popBackStack()
                     }
                     override fun rename(r: Recording, title: String) { libVm.rename(r, title) }
+                    override fun setStyle(r: Recording, style: Int) { libVm.setStyle(r, style) }
                     override fun delete(r: Recording) { libVm.delete(r) }
                     override fun share(r: Recording, toWhatsApp: Boolean, convert: Boolean) { libVm.share(r, toWhatsApp, convert) }
                     override fun needsConversion(r: Recording) = libVm.needsConversion(r)

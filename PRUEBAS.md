@@ -71,7 +71,10 @@ Preparación: instalá el APK (ver README §1) y aceptá micrófono y notificaci
 - [ ] **Ordenar**: Fecha, Nombre y Duración. Tocar de nuevo invierte el orden (flecha).
 - [ ] **Renombrar**: el nombre cambia en la lista, en la etiqueta del cassette cargado y en el archivo.
 - [ ] **Eliminar**: pide confirmación y desaparece. Si estaba cargado, el aparato lo expulsa.
-- [ ] **Cargar**: vuelve al aparato con ese cassette adentro.
+- [ ] **Cargar**: vuelve al aparato con ese cassette adentro, con el mismo estilo que en la lista.
+- [ ] Grabaciones seguidas tienen cassettes **distintos** (colores, etiqueta, carcasa).
+- [ ] **Estilo**: elegí otro cassette; cambia en la lista y, si está cargado, en el aparato. «Automático» vuelve al original.
+- [ ] Las grabaciones hechas con la versión 1.0 siguen apareciendo (y ahora con estilos distintos).
 
 ## 8. Compartir por WhatsApp
 - [ ] M4A → **WhatsApp**: abre WhatsApp, elegís el chat y llega como audio reproducible.
